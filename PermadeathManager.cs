@@ -1,7 +1,7 @@
 ﻿// ===============================
 // PermadeathManager.cs (REWRITE)
 // Per-character dynasty wipe on death
-// NO persistent ban -> player can start a NEW dynasty after dying
+// Sends player to DreamWorld (setup) instead of a menu scene
 // ===============================
 
 using System;
@@ -16,8 +16,8 @@ namespace OutwardDynasty
     {
         private const int ECHO_ITEM_ID = 9000500;
 
-        // Change if your menu scene name differs
-        private const string MENU_SCENE = "MainMenu";
+        // Use the same heaven scene as HeavenRedirectsManager
+        private const string HEAVEN_SCENE = "DreamWorld";
 
         private static PermadeathManager _instance;
 
@@ -42,7 +42,8 @@ namespace OutwardDynasty
                     DynastyCore core = DynastyCore.Instance;
                     if (core == null || core.MasterData == null) return;
 
-                    // If dynasty never started, don't enforce wipe.
+                    // Only enforce permadeath when dynasty is actually running.
+                    if (!core.IsDynastyModeEnabled) return;
                     if (!core.MasterData.DynastyStarted) return;
 
                     // Echo prevents death wipe
@@ -53,9 +54,8 @@ namespace OutwardDynasty
                         return;
                     }
 
-                    // Apocalypse can still wipe, but DOES NOT ban forever.
-                    // (If you want apocalypse to be "hard ban", tell me and I’ll re-add it.)
-                    WipeDynastyAndReturnToMenu(__instance, core, core.MasterData.IsApocalypseActive ? "Apocalypse Death" : "Permadeath");
+                    string reason = core.MasterData.IsApocalypseActive ? "Apocalypse Death" : "Permadeath";
+                    WipeDynastyAndReturnToHeaven(__instance, core, reason);
                 }
                 catch (Exception ex)
                 {
@@ -63,7 +63,7 @@ namespace OutwardDynasty
                 }
             }
 
-            private static void WipeDynastyAndReturnToMenu(Character c, DynastyCore core, string reason)
+            private static void WipeDynastyAndReturnToHeaven(Character c, DynastyCore core, string reason)
             {
                 Debug.LogError($"[Dynasty] DYNASTY WIPE: {c.Name} | Reason={reason}");
 
@@ -71,7 +71,6 @@ namespace OutwardDynasty
                 DynastySaveManager.DeleteCurrentCharacterSave();
 
                 // 2) Reset in-memory state to a fresh dynasty (not started)
-                // This allows the SAME character to start a new dynasty immediately.
                 core.MasterData = new DynastySaveData
                 {
                     DynastyStarted = false,
@@ -90,27 +89,30 @@ namespace OutwardDynasty
                 if (core.MasterData.Factions == null) core.MasterData.Factions = new System.Collections.Generic.List<FactionData>();
 
                 // Seed defaults again (factions/towns)
-                var lib = core.GetComponent<FactionsLibrary>();
-                if (lib != null) lib.EnsureDefaults(core.MasterData);
+                // FactionsLibrary is static; no component instance.
+                var lib = (object)null;
+                if (lib != null) FactionsLibrary.EnsureDefaults(core.MasterData);
 
                 // 3) Save fresh state (creates a new dynasty file for this character)
                 core.SaveDynasty();
 
-                // 4) Notify player + kick to menu
-                c.CharacterUI?.ShowInfoNotification("PERMADEATH: Your dynasty was wiped. You can start a new dynasty.");
+                // 4) Notify player + go to DreamWorld setup
+                c.CharacterUI?.ShowInfoNotification("PERMADEATH: Your dynasty was wiped. Returning to DreamWorld...");
 
                 if (_instance != null)
-                    _instance.StartCoroutine(_instance.KickToMenu());
+                    _instance.StartCoroutine(_instance.KickToHeaven());
                 else
-                    SceneManager.LoadScene(MENU_SCENE, LoadSceneMode.Single);
+                    SceneManager.LoadScene(HEAVEN_SCENE, LoadSceneMode.Single);
             }
         }
 
-        private IEnumerator KickToMenu()
+        private IEnumerator KickToHeaven()
         {
-            yield return new WaitForSeconds(2f);
-            Debug.Log("[Dynasty] Loading menu after dynasty wipe.");
-            SceneManager.LoadScene(MENU_SCENE, LoadSceneMode.Single);
+            // short delay so UI notification can appear
+            yield return new WaitForSeconds(1.0f);
+
+            Debug.Log("[Dynasty] Loading DreamWorld after dynasty wipe.");
+            SceneManager.LoadScene(HEAVEN_SCENE, LoadSceneMode.Single);
         }
     }
 }

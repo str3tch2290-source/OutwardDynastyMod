@@ -1,0 +1,10 @@
+<Solution>
+  <Folder Name="/Solution Items/">
+    <File Path="DynastyMenu.cs" />
+    <File Path="DynastySaveData.cs" />
+    <File Path="EnvironmentManager.cs" />
+    <File Path="PermadeathManager.cs" />
+    <File Path="SeigeManager.cs" />
+  </Folder>
+  <Project Path="OutwardDynasty.csproj" Id="f2df06de-15bc-421e-969a-645aecb44fb1" />
+</Solution>

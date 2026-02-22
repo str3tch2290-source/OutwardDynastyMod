@@ -10,7 +10,7 @@ namespace OutwardDynasty
         void Update()
         {
             // Explicit namespace prevents CS1069 and CS0117
-            if (UnityEngine.Input.GetKeyDown(KeyCode.P))
+            if (InputProxy.GetKeyDown(KeyCode.P))
             {
                 _isOpen = !_isOpen;
                 Cursor.visible = _isOpen;

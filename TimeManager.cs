@@ -14,7 +14,10 @@ namespace OutwardDynasty
         private const int SYNC_HOUR = 4; // 4 AM
 
         private bool _hasProcessedToday = false;
+        
         private int _lastHour = -1;
+        private int _lastSnapshotHour = -1;
+
 
         private bool _timeSynced = false;
         private int _lastSyncedDynastyDay = int.MinValue;
@@ -71,7 +74,38 @@ namespace OutwardDynasty
             }
         }
 
-        private void SyncTimeToDynasty()
+        
+private void TryHourlySnapshot(int currentHour)
+{
+    try
+    {
+        if (_core == null || _core.MasterData == null) return;
+        if (!_core.MasterData.DynastyStarted) return;
+        if (currentHour == _lastSnapshotHour) return;
+
+        _lastSnapshotHour = currentHour;
+
+        // Build snapshot (meta + local inventory) and push to Companion if connected.
+        string snap = DynastySnapshotManager.BuildSnapshotJson(_core.MasterData);
+        DynastyLocalCommitStore.SaveLatest(snap);
+
+        var cc = CompanionClient.Instance;
+        if (cc != null && cc.Connected)
+        {
+            cc.PushSnapshot(snap, out var _);
+        }
+
+        // Local history record (works even if Companion is offline)
+        DynastyHistory.LogEvent("snapshot_hourly", new System.Collections.Generic.Dictionary<string, object>
+        {
+            {"hour", currentHour},
+            {"day", _core.MasterData.DayCount}
+        });
+    }
+    catch { }
+}
+
+private void SyncTimeToDynasty()
         {
             if (_core == null || _core.MasterData == null) return;
             if (TOD_Sky.Instance == null) return;

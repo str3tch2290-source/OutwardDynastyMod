@@ -1,0 +1,12 @@
+<Project>
+	<PropertyGroup>
+		<!-- Must be the folder that CONTAINS Assembly-CSharp.dll -->
+		<OutwardManagedDir>D:\SteamLibrary\steamapps\common\Outward\Outward_Data\Managed</OutwardManagedDir>
+
+		<!-- Thunderstore profile BepInEx core is fine if it contains 0Harmony.dll -->
+		<BepInExCoreDir>E:\Outward mods\OutwardDe\profiles\Alt start pack\BepInEx\core</BepInExCoreDir>
+
+		<!-- Optional -->
+		<BepInExPluginsDir>E:\Outward mods\OutwardDe\profiles\Alt start pack\BepInEx\plugins</BepInExPluginsDir>
+	</PropertyGroup>
+</Project>

@@ -1,0 +1,332 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="15.0">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{F2DF06DE-15BC-421E-969A-645AECB44FB1}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>OutwardDynasty</RootNamespace>
+    <AssemblyName>OutwardDynasty</AssemblyName>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <Deterministic>true</Deterministic>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>Output\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <PlatformTarget>ARM64</PlatformTarget>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="0Harmony">
+      <HintPath>$(BepInExCoreDir)\0Harmony.dll</HintPath>
+    </Reference>
+    <Reference Include="Accessibility" />
+    <Reference Include="AlternateStart">
+      <HintPath>Libs\AlternateStart.dll</HintPath>
+    </Reference>
+    <Reference Include="Assembly-CSharp">
+      <HintPath>$(OutwardManagedDir)\Assembly-CSharp.dll</HintPath>
+    </Reference>
+    <Reference Include="Assembly-CSharp-firstpass">
+      <HintPath>$(OutwardManagedDir)\Assembly-CSharp-firstpass.dll</HintPath>
+    </Reference>
+    <Reference Include="AwesomeTechnologies.TouchReactSystemPro.Runtime">
+      <HintPath>$(OutwardManagedDir)\AwesomeTechnologies.TouchReactSystemPro.Runtime.dll</HintPath>
+    </Reference>
+    <Reference Include="AwesomeTechnologies.VegetationStudioPro.Runtime">
+      <HintPath>$(OutwardManagedDir)\AwesomeTechnologies.VegetationStudioPro.Runtime.dll</HintPath>
+    </Reference>
+    <Reference Include="BackpackExpansion" Condition="Exists('$(BepInExPluginsDir)\..\..\Outward mods\OutwardDe\profiles\Alt start pack Pvp ready\BepInEx\plugins\Proboina-Proboinas_Backpack_Expansion\BackpackExpansion.dll')">
+      <HintPath>$(BepInExPluginsDir)\BackpackExpansion.dll</HintPath>
+    </Reference>
+    <Reference Include="BepInEx">
+      <HintPath>$(BepInExCoreDir)\BepInEx.dll</HintPath>
+    </Reference>
+    <Reference Include="BepInEx.Harmony">
+      <HintPath>$(BepInExCoreDir)\BepInEx.Harmony.dll</HintPath>
+    </Reference>
+    <Reference Include="BepInEx.Preloader">
+      <HintPath>$(BepInExCoreDir)\BepInEx.Preloader.dll</HintPath>
+    </Reference>
+    <Reference Include="ColorPickerKnife">
+      <HintPath>Libs\ColorPickerKnife.dll</HintPath>
+    </Reference>
+    <Reference Include="ConfigurationManager" Condition="Exists('$(BepInExPluginsDir)\..\..\Outward mods\OutwardDe\profiles\Alt start pack Pvp ready\BepInEx\plugins\Mefino-Outward_Config_Manager\ConfigurationManager.dll')">
+      <HintPath>$(BepInExPluginsDir)\ConfigurationManager.dll</HintPath>
+    </Reference>
+    <Reference Include="CustomAttributes">
+      <HintPath>Libs\CustomAttributes.dll</HintPath>
+    </Reference>
+    <Reference Include="DrinkWhileRunning">
+      <HintPath>Libs\DrinkWhileRunning.dll</HintPath>
+    </Reference>
+    <Reference Include="GalaxyCSharp">
+      <HintPath>$(OutwardManagedDir)\GalaxyCSharp.dll</HintPath>
+    </Reference>
+    <Reference Include="HarmonyXInterop">
+      <HintPath>$(BepInExCoreDir)\HarmonyXInterop.dll</HintPath>
+    </Reference>
+    <Reference Include="Ionic.Zip.Reduced">
+      <HintPath>$(OutwardManagedDir)\Ionic.Zip.Reduced.dll</HintPath>
+    </Reference>
+    <Reference Include="MadDelayedDamage">
+      <HintPath>Libs\MadDelayedDamage.dll</HintPath>
+    </Reference>
+    <Reference Include="Mono.Cecil">
+      <HintPath>$(BepInExCoreDir)\Mono.Cecil.dll</HintPath>
+    </Reference>
+    <Reference Include="Mono.Cecil.Mdb">
+      <HintPath>$(BepInExCoreDir)\Mono.Cecil.Mdb.dll</HintPath>
+    </Reference>
+    <Reference Include="Mono.Cecil.Pdb">
+      <HintPath>$(BepInExCoreDir)\Mono.Cecil.Pdb.dll</HintPath>
+    </Reference>
+    <Reference Include="Mono.Cecil.Rocks">
+      <HintPath>$(BepInExCoreDir)\Mono.Cecil.Rocks.dll</HintPath>
+    </Reference>
+    <Reference Include="Mono.Data.Sqlite">
+      <HintPath>$(OutwardManagedDir)\Mono.Data.Sqlite.dll</HintPath>
+    </Reference>
+    <Reference Include="Mono.Posix">
+      <HintPath>$(OutwardManagedDir)\Mono.Posix.dll</HintPath>
+    </Reference>
+    <Reference Include="Mono.Security">
+      <HintPath>$(OutwardManagedDir)\Mono.Security.dll</HintPath>
+    </Reference>
+    <Reference Include="Mono.WebBrowser">
+      <HintPath>$(OutwardManagedDir)\Mono.WebBrowser.dll</HintPath>
+    </Reference>
+    <Reference Include="MonoMod.RuntimeDetour">
+      <HintPath>$(BepInExCoreDir)\MonoMod.RuntimeDetour.dll</HintPath>
+    </Reference>
+    <Reference Include="MonoMod.Utils">
+      <HintPath>$(BepInExCoreDir)\MonoMod.Utils.dll</HintPath>
+    </Reference>
+    <Reference Include="PvP" Condition="Exists('$(BepInExPluginsDir)\..\..\Outward mods\OutwardDe\profiles\Alt start pack Pvp ready\BepInEx\plugins\sinai-dev-PvP\PvP.dll')">
+      <HintPath>$(BepInExPluginsDir)\PvP.dll</HintPath>
+    </Reference>
+    <Reference Include="QuestsOfAurai">
+      <HintPath>Libs\QuestsOfAurai.dll</HintPath>
+    </Reference>
+    <Reference Include="RaidMode">
+      <HintPath>Libs\RaidMode.dll</HintPath>
+    </Reference>
+    <Reference Include="SideLoader" Condition="Exists('$(BepInExPluginsDir)\..\..\Outward mods\OutwardDe\profiles\Alt start pack Pvp ready\BepInEx\plugins\sinai-dev-SideLoader\SideLoader.dll')">
+      <HintPath>$(BepInExPluginsDir)\SideLoader.dll</HintPath>
+    </Reference>
+    <Reference Include="SideLoader_ExtendedEffects" Condition="Exists('$(BepInExPluginsDir)\..\..\Outward mods\OutwardDe\profiles\Alt start pack Pvp ready\BepInEx\plugins\SLExtendedEffects-SideLoader_ExtendedEffects\SideLoader_ExtendedEffects.dll')">
+      <HintPath>$(BepInExPluginsDir)\SideLoader_ExtendedEffects.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+    <Reference Include="TrainersOfAurai">
+      <HintPath>Libs\TrainersOfAurai.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine">
+      <HintPath>$(OutwardManagedDir)\UnityEngine.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.AssetBundleModule">
+      <HintPath>$(OutwardManagedDir)\UnityEngine.AssetBundleModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.CoreModule">
+      <HintPath>$(OutwardManagedDir)\UnityEngine.CoreModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.DirectorModule">
+      <HintPath>$(OutwardManagedDir)\UnityEngine.DirectorModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.ImageConversionModule">
+      <HintPath>$(OutwardManagedDir)\UnityEngine.ImageConversionModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.IMGUIModule">
+      <HintPath>$(OutwardManagedDir)\UnityEngine.IMGUIModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.InputLegacyModule">
+      <HintPath>$(OutwardManagedDir)\UnityEngine.InputLegacyModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.JSONSerializeModule">
+      <HintPath>$(OutwardManagedDir)\UnityEngine.JSONSerializeModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.PhysicsModule">
+      <HintPath>$(OutwardManagedDir)\UnityEngine.PhysicsModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.TerrainModule">
+      <HintPath>$(OutwardManagedDir)\UnityEngine.TerrainModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.TerrainPhysicsModule">
+      <HintPath>$(OutwardManagedDir)\UnityEngine.TerrainPhysicsModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.TextRenderingModule">
+      <HintPath>$(OutwardManagedDir)\UnityEngine.TextRenderingModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.TilemapModule">
+      <HintPath>$(OutwardManagedDir)\UnityEngine.TilemapModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.TLSModule">
+      <HintPath>$(OutwardManagedDir)\UnityEngine.TLSModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.UI">
+      <HintPath>$(OutwardManagedDir)\UnityEngine.UI.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.UIElementsModule">
+      <HintPath>$(OutwardManagedDir)\UnityEngine.UIElementsModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.UIElementsNativeModule">
+      <HintPath>$(OutwardManagedDir)\UnityEngine.UIElementsNativeModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.UIModule">
+      <HintPath>$(OutwardManagedDir)\UnityEngine.UIModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.UmbraModule">
+      <HintPath>$(OutwardManagedDir)\UnityEngine.UmbraModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.UNETModule">
+      <HintPath>$(OutwardManagedDir)\UnityEngine.UNETModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.UnityAnalyticsModule">
+      <HintPath>$(OutwardManagedDir)\UnityEngine.UnityAnalyticsModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.UnityConnectModule">
+      <HintPath>$(OutwardManagedDir)\UnityEngine.UnityConnectModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.UnityCurlModule">
+      <HintPath>$(OutwardManagedDir)\UnityEngine.UnityCurlModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.UnityTestProtocolModule">
+      <HintPath>$(OutwardManagedDir)\UnityEngine.UnityTestProtocolModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.UnityWebRequestAssetBundleModule">
+      <HintPath>$(OutwardManagedDir)\UnityEngine.UnityWebRequestAssetBundleModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.UnityWebRequestAudioModule">
+      <HintPath>$(OutwardManagedDir)\UnityEngine.UnityWebRequestAudioModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.UnityWebRequestModule">
+      <HintPath>$(OutwardManagedDir)\UnityEngine.UnityWebRequestModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.UnityWebRequestTextureModule">
+      <HintPath>$(OutwardManagedDir)\UnityEngine.UnityWebRequestTextureModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.UnityWebRequestWWWModule">
+      <HintPath>$(OutwardManagedDir)\UnityEngine.UnityWebRequestWWWModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.VehiclesModule">
+      <HintPath>$(OutwardManagedDir)\UnityEngine.VehiclesModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.VFXModule">
+      <HintPath>$(OutwardManagedDir)\UnityEngine.VFXModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.VideoModule">
+      <HintPath>$(OutwardManagedDir)\UnityEngine.VideoModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.VirtualTexturingModule">
+      <HintPath>$(OutwardManagedDir)\UnityEngine.VirtualTexturingModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.VRModule">
+      <HintPath>$(OutwardManagedDir)\UnityEngine.VRModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.WindModule">
+      <HintPath>$(OutwardManagedDir)\UnityEngine.WindModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.XRModule">
+      <HintPath>$(OutwardManagedDir)\UnityEngine.XRModule.dll</HintPath>
+    </Reference>
+    <Reference Include="VikBackpackAdditions">
+      <HintPath>Libs\VikBackpackAdditions.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <ItemGroup>
+    <Compile Include="Alternate start gate patch.cs" />
+    <Compile Include="AlternateStartDynastyGaurd.cs" />
+    <Compile Include="AsmFactionMenuHijack.cs" />
+    <Compile Include="AuthorityFreezeManager.cs" />
+    <Compile Include="AuthorityHUD.cs" />
+    <Compile Include="CompanionClient.cs" />
+    <Compile Include="ConfirmSetup.cs" />
+    <Compile Include="CustomAttributesBypass.cs" />
+    <Compile Include="DreamWorldLock.cs" />
+    <Compile Include="DreamWorldSanitizer.cs" />
+    <Compile Include="DynastyASMStartBlocker.cs" />
+    <Compile Include="DynastyCommitWatcher.cs" />
+    <Compile Include="DynastyCompanionLauncher.cs" />
+    <Compile Include="DynastyCore.cs" />
+    <Compile Include="DynastyDataAccess.cs" />
+    <Compile Include="DynastyDataModels.cs" />
+    <Compile Include="DynastyDialogueGate.cs" />
+    <Compile Include="DynastyDialogueLines.cs" />
+    <Compile Include="DynastyGazetteReflectionFix.cs" />
+    <Compile Include="DynastyHUD.cs" />
+    <Compile Include="DynastyIdentity.cs" />
+    <Compile Include="DynastyLogSpamFilter.cs" />
+    <Compile Include="DynastyMasterData.cs" />
+    <Compile Include="DynastyMenu.cs" />
+    <Compile Include="DynastyModeToggleMenu.cs" />
+    <Compile Include="DynastyNewspaperFactionBridge.cs" />
+    <Compile Include="DynastyNpcInteractionBlocker.cs" />
+    <Compile Include="DynastyNpcInteractionUI.cs" />
+    <Compile Include="DynastyNpcResolver.cs" />
+    <Compile Include="DynastyNpcSimManager.cs" />
+    <Compile Include="DynastyPlacementGuard.cs" />
+    <Compile Include="DynastyPlayerEffects.cs" />
+    <Compile Include="DynastyQuestContentManager.cs" />
+    <Compile Include="DynastyQuestGate.cs" />
+    <Compile Include="DynastyQuestRules.cs" />
+    <Compile Include="DynastySaveBinder.cs" />
+    <Compile Include="DynastySaveData.cs" />
+    <Compile Include="DynastySaveManager.cs" />
+    <Compile Include="DynastySceneRedirector.cs" />
+    <Compile Include="DynastySleepState.cs" />
+    <Compile Include="DynastySnapshotManager.cs" />
+    <Compile Include="DynastyTick30MinManager.cs" />
+    <Compile Include="DynastyWorldContext.cs" />
+    <Compile Include="EnvironmentManager.cs" />
+    <Compile Include="FactionDebugNewspaper.cs" />
+    <Compile Include="FactionsLibrary.cs" />
+    <Compile Include="ForceResyncWidget.cs" />
+    <Compile Include="HeavenRedirectsManager.cs" />
+    <Compile Include="HostMigrationManager.cs" />
+    <Compile Include="InputFreezeManager.cs" />
+    <Compile Include="InputProxy.cs" />
+    <Compile Include="JoinCodeCodec.cs" />
+    <Compile Include="PermadeathManager - Copy.cs" />
+    <Compile Include="PermadeathManager.cs" />
+    <Compile Include="Plugin.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Properties\CustomAttributesBypass.cs" />
+    <Compile Include="QuestStartSniffer_FIXED.cs" />
+    <Compile Include="SceneNameResolver.cs" />
+    <Compile Include="SeigeManager.cs" />
+    <Compile Include="simulationEngine.cs" />
+    <Compile Include="SoulEchoSystem.cs" />
+    <Compile Include="StrategyMenucs.cs" />
+    <Compile Include="TemperatureNullGuardPatches.cs" />
+    <Compile Include="TimeManager.cs" />
+    <Compile Include="tradeInfluencePath.cs" />
+    <Compile Include="TradeRoutes.cs" />
+    <Compile Include="VanillaCampaignBlocker.cs" />
+    <Compile Include="WorldSimulation.cs" />
+  </ItemGroup>
+</Project>

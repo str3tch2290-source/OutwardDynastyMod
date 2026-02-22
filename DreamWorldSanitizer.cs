@@ -1,16 +1,20 @@
 ﻿// ======================================================
-// DreamWorldSanitizer.cs (REWRITE - SCENE SCOPED)
-// Fixes:
-// - Disabling "144 NavMeshAgent(s)" globally (too broad)
-// - Only touches objects that are actually in the DreamWorld scene
+// DreamWorldSanitizer.cs (REWRITE - NO NavMeshAgent REF)
 //
-// What it does:
-// - On DreamWorld load: disables NavMeshAgent components found under DreamWorld roots
-// - After local player exists: destroys non-local Characters near player that have NavMeshAgent
+// Fixes:
+// - "fly through sky" in DreamWorld by stabilizing the player immediately
+// - avoids UnityEngine.AIModule dependency (no NavMeshAgent)
+//
+// What it does on DreamWorld load:
+// - waits for local character
+// - freezes momentum + temporarily disables gravity/controller
+// - snaps to a stable ground point (raycast from above)
+// - disables common AI/brain scripts in DreamWorld (by name scan)
 // ======================================================
 
 using System;
 using System.Collections;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -18,219 +22,216 @@ namespace OutwardDynasty
 {
     public class DreamWorldSanitizer : MonoBehaviour
     {
-        private const string DREAMWORLD_SCENE = "DreamWorld";
-
-        private const float CLEAN_RADIUS = 60f;
-        private const int PASSES = 10;
-        private const float PASS_DELAY = 0.5f;
-        private const float INITIAL_DELAY = 0.75f;
+        private const string HEAVEN_SCENE = "DreamWorld";
 
         private DynastyCore _core;
-        private bool _deleteRoutineRunning;
 
-        private static readonly string[] NameWhitelist =
-        {
-            "Soul-Guide",
-            "Soul Guide",
-            "Guide",
-            "Trainer",
-            "Guard",
-            "Vendor",
-            "Merchant",
-            "Eto Akiyuki"
-        };
+        private bool _running;
+        private Coroutine _co;
 
-        public void Initialize(DynastyCore core)
-        {
-            _core = core;
-            Debug.Log("[Dynasty] DreamWorldSanitizer attached.");
-        }
+        public void Initialize(DynastyCore core) => _core = core;
 
-        private void OnEnable()
-        {
-            SceneManager.sceneLoaded += OnSceneLoaded;
-        }
+        private void OnEnable() => SceneManager.sceneLoaded += OnSceneLoaded;
 
         private void OnDisable()
         {
             SceneManager.sceneLoaded -= OnSceneLoaded;
+            if (_co != null) StopCoroutine(_co);
+            _co = null;
+            _running = false;
         }
 
         private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
         {
-            if (!IsDreamWorld(scene.name)) return;
+            if (!scene.IsValid()) return;
+            if (!scene.name.Equals(HEAVEN_SCENE, StringComparison.OrdinalIgnoreCase)) return;
 
-            _deleteRoutineRunning = false;
-
-            // ✅ Disable agents ONLY under DreamWorld scene roots (not global)
-            StartCoroutine(DisableAgentsInDreamWorldNextFrame(scene));
+            if (_co != null) StopCoroutine(_co);
+            _co = StartCoroutine(CoSanitizeDreamWorld());
         }
 
-        private IEnumerator DisableAgentsInDreamWorldNextFrame(Scene dreamWorldScene)
+        private IEnumerator CoSanitizeDreamWorld()
         {
-            yield return null; // let objects spawn
+            if (_running) yield break;
+            _running = true;
 
+            // let scene boot a little
+            yield return null;
+            yield return null;
+
+            // Disable "AI-ish" scripts in DreamWorld WITHOUT NavMeshAgent
+            int disabled = 0;
             try
             {
-                if (!dreamWorldScene.isLoaded) yield break;
-
-                int disabled = DisableNavMeshAgentsInScene(dreamWorldScene);
-                if (disabled > 0)
-                    Debug.Log($"[Dynasty] DreamWorldSanitizer: disabled {disabled} NavMeshAgent(s) in DreamWorld scene.");
-            }
-            catch (Exception ex)
-            {
-                Debug.LogWarning("[Dynasty] DreamWorldSanitizer: agent-disable error (non-fatal): " + ex);
-            }
-        }
-
-        private void Update()
-        {
-            if (_core == null) return;
-            if (!_core.IsDynastyModeEnabled) return;
-
-            if (!IsDreamWorld(SceneManager.GetActiveScene().name)) return;
-            if (_deleteRoutineRunning) return;
-
-            Character local = SafeGetLocalCharacter();
-            if (local == null) return;
-
-            _deleteRoutineRunning = true;
-            StartCoroutine(DeleteRoutine(local));
-        }
-
-        private IEnumerator DeleteRoutine(Character local)
-        {
-            yield return new WaitForSeconds(INITIAL_DELAY);
-
-            for (int pass = 0; pass < PASSES; pass++)
-            {
-                yield return new WaitForSeconds(PASS_DELAY);
-
-                if (!IsDreamWorld(SceneManager.GetActiveScene().name))
-                    yield break;
-
-                if (local == null)
-                    yield break;
-
-                int removed = RemoveNavMeshAgentCharactersNear(local, CLEAN_RADIUS);
-                if (removed > 0)
-                    Debug.Log($"[Dynasty] DreamWorldSanitizer pass {pass + 1}/{PASSES}: removed {removed} mob(s).");
-            }
-        }
-
-        private int DisableNavMeshAgentsInScene(Scene scene)
-        {
-            int disabled = 0;
-
-            GameObject[] roots = scene.GetRootGameObjects();
-            if (roots == null) return 0;
-
-            for (int i = 0; i < roots.Length; i++)
-            {
-                GameObject root = roots[i];
-                if (root == null) continue;
-
-                // find any components named "NavMeshAgent" under this root
-                Component[] comps = root.GetComponentsInChildren<Component>(true);
-                if (comps == null) continue;
-
-                for (int c = 0; c < comps.Length; c++)
+                var allBehaviours = Resources.FindObjectsOfTypeAll<MonoBehaviour>();
+                for (int i = 0; i < allBehaviours.Length; i++)
                 {
-                    Component comp = comps[c];
-                    if (comp == null) continue;
+                    var b = allBehaviours[i];
+                    if (b == null) continue;
+                    if (!b.gameObject.scene.IsValid()) continue;
+                    if (!b.gameObject.scene.name.Equals(HEAVEN_SCENE, StringComparison.OrdinalIgnoreCase)) continue;
 
-                    if (!string.Equals(comp.GetType().Name, "NavMeshAgent", StringComparison.OrdinalIgnoreCase))
-                        continue;
+                    string tn = b.GetType().Name;
 
-                    // comp.enabled = false (reflection-safe)
+                    // High-signal filters (safe + broad)
+                    bool looksLikeAI =
+                        tn.IndexOf("NavMesh", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                        tn.IndexOf("AI", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                        tn.IndexOf("Brain", StringComparison.OrdinalIgnoreCase) >= 0;
+
+                    if (!looksLikeAI) continue;
+
                     try
                     {
-                        var prop = comp.GetType().GetProperty("enabled");
-                        if (prop != null && prop.PropertyType == typeof(bool))
+                        if (b.enabled)
                         {
-                            prop.SetValue(comp, false, null);
+                            b.enabled = false;
                             disabled++;
                         }
                     }
                     catch { }
                 }
             }
+            catch { }
 
-            return disabled;
-        }
+            Debug.Log($"[Dynasty] DreamWorldSanitizer: disabled {disabled} AI-ish component(s) in DreamWorld scene.");
 
-        private int RemoveNavMeshAgentCharactersNear(Character local, float radius)
-        {
-            int removed = 0;
-
-            Scene active = SceneManager.GetActiveScene();
-            Vector3 center = local.transform.position;
-            float r2 = radius * radius;
-
-            Character[] all = GameObject.FindObjectsOfType<Character>(); // scene-only
-            if (all == null) return 0;
-
-            for (int i = 0; i < all.Length; i++)
+            // Wait for local character
+            float t0 = Time.realtimeSinceStartup;
+            Character c = null;
+            while (c == null && Time.realtimeSinceStartup - t0 < 6f)
             {
-                Character c = all[i];
-                if (c == null) continue;
-                if (IsLocalPlayerSafe(c)) continue;
-
-                GameObject go = c.gameObject;
-                if (go == null) continue;
-                if (go.scene != active) continue;
-
-                Vector3 pos = c.transform.position;
-                if ((pos - center).sqrMagnitude > r2) continue;
-
-                string name = go.name ?? "";
-                if (ContainsAny(name, NameWhitelist))
-                    continue;
-
-                // only remove if it has NavMeshAgent
-                if (go.GetComponent("NavMeshAgent") == null)
-                    continue;
-
-                Debug.Log($"[Dynasty] DreamWorldSanitizer destroying mob: '{go.name}'");
-                Destroy(go);
-                removed++;
+                c = SafeGetLocalCharacter();
+                if (c == null) yield return null;
             }
 
-            return removed;
-        }
+            if (c == null)
+            {
+                _running = false;
+                yield break;
+            }
 
-        private static bool IsDreamWorld(string sceneName)
-        {
-            return string.Equals(sceneName, DREAMWORLD_SCENE, StringComparison.OrdinalIgnoreCase);
+            // Stabilize player
+            Rigidbody rb = null;
+            CharacterController cc = null;
+
+            try { rb = c.GetComponent<Rigidbody>(); } catch { }
+            try { cc = c.GetComponent<CharacterController>(); } catch { }
+
+            bool hadGravity = false;
+            bool hadCCEnabled = false;
+
+            if (rb != null)
+            {
+                hadGravity = rb.useGravity;
+                rb.velocity = Vector3.zero;
+                rb.angularVelocity = Vector3.zero;
+                rb.useGravity = false;
+            }
+
+            if (cc != null)
+            {
+                hadCCEnabled = cc.enabled;
+                cc.enabled = false;
+            }
+
+            // Try multiple snap attempts as colliders come online
+            for (int attempt = 0; attempt < 12; attempt++)
+            {
+                if (TryFindDreamWorldGround(out var ground))
+                {
+                    SetCharacterPosition(c, ground + Vector3.up * 1.25f);
+                    if (rb != null)
+                    {
+                        rb.velocity = Vector3.zero;
+                        rb.angularVelocity = Vector3.zero;
+                    }
+                }
+
+                yield return new WaitForSeconds(0.25f);
+
+                if (IsGroundedEnough(c.transform.position))
+                    break;
+            }
+
+            // Hold stability briefly (prevents drift/fall after snap)
+            float holdStart = Time.realtimeSinceStartup;
+            float holdSeconds = 2.5f;
+
+            while (Time.realtimeSinceStartup - holdStart < holdSeconds)
+            {
+                if (rb != null)
+                {
+                    rb.velocity = Vector3.zero;
+                    rb.angularVelocity = Vector3.zero;
+                }
+                yield return null;
+            }
+
+            // Restore
+            if (cc != null) cc.enabled = hadCCEnabled;
+            if (rb != null) rb.useGravity = hadGravity;
+
+            _running = false;
         }
 
         private static Character SafeGetLocalCharacter()
         {
             try
             {
-                if (CharacterManager.Instance == null) return null;
-                return CharacterManager.Instance.GetFirstLocalCharacter();
+                return CharacterManager.Instance != null
+                    ? CharacterManager.Instance.GetFirstLocalCharacter()
+                    : null;
             }
             catch { return null; }
         }
 
-        private static bool IsLocalPlayerSafe(Character c)
+        private static void SetCharacterPosition(Character c, Vector3 pos)
         {
-            try { return c != null && c.IsLocalPlayer; }
-            catch { return false; }
+            try { c.transform.position = pos; } catch { }
         }
 
-        private static bool ContainsAny(string haystack, string[] needles)
+        private static bool IsGroundedEnough(Vector3 pos)
         {
-            if (string.IsNullOrEmpty(haystack) || needles == null) return false;
-            string h = haystack.ToLowerInvariant();
-            for (int i = 0; i < needles.Length; i++)
+            RaycastHit hit;
+            Vector3 start = pos + Vector3.up * 2f;
+            if (Physics.SphereCast(start, 0.6f, Vector3.down, out hit, 12f, ~0, QueryTriggerInteraction.Ignore))
+                return (pos.y - hit.point.y) < 3.0f;
+            return false;
+        }
+
+        private static bool TryFindDreamWorldGround(out Vector3 ground)
+        {
+            ground = Vector3.zero;
+
+            try
             {
-                string n = needles[i];
-                if (string.IsNullOrEmpty(n)) continue;
-                if (h.Contains(n.ToLowerInvariant())) return true;
+                // Probe a few spots around the expected center
+                for (int r = 0; r < 6; r++)
+                {
+                    float d = r * 3f;
+                    Vector3[] offsets =
+                    {
+                        new Vector3(0,0,0),
+                        new Vector3( d,0, 0), new Vector3(-d,0, 0),
+                        new Vector3(0,0, d), new Vector3(0,0,-d),
+                        new Vector3( d,0, d), new Vector3(-d,0, d),
+                        new Vector3( d,0,-d), new Vector3(-d,0,-d),
+                    };
+
+                    for (int i = 0; i < offsets.Length; i++)
+                    {
+                        var probe = new Vector3(offsets[i].x, 800f, offsets[i].z);
+                        if (Physics.SphereCast(probe, 0.9f, Vector3.down, out var hit, 3000f, ~0, QueryTriggerInteraction.Ignore))
+                        {
+                            ground = hit.point;
+                            return true;
+                        }
+                    }
+                }
             }
+            catch { }
+
             return false;
         }
     }

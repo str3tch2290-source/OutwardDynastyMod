@@ -3,7 +3,7 @@ using System.Reflection;
 
 namespace OutwardDynasty
 {
-    internal static class CustomAttributesCompat
+    internal static class CustomAttributesCompat_Bypass
     {
         // Tries to hook CustomAttributes.CustomAttributesBase.OnCharacterLeechEvent if it exists.
         // If the assembly/type/member is missing or renamed, it silently does nothing.
